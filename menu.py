@@ -1,32 +1,47 @@
 import pygame
 import pygame_menu
-import subprocess #из одного файла запускаем другой
+import subprocess
 import sys
 
-from pygame_menu.examples.other.widget_positioning import my_theme
-from pygame_menu.examples.simple import set_difficulty
+def start_the_game():
+    # Запускаем my_game.py и передаём выбранную сложность
+    subprocess.Popen([sys.executable, "my_game.py", selected_difficulty])
 
+def set_difficulty(value, difficulty):
+    global selected_difficulty
+    selected_difficulty = difficulty
+    print(f"Сложность установлена: {selected_difficulty}")
 
-def start_game():
-    print('Игра началась')
-selected_difficulty = "green" # переменная, где будет храниться выбранная сложность
-
-def set_difficulty(value, difficulty): # функция вызывается при смене сложности
-    global selected_difficulty # говорим, что будем менять глобальную переменную
-    selected_difficulty = difficulty # сохраняем выбранную сложность
-    print(selected_difficulty)
-
-def start_the_game(): # функция запуска игры
-    subprocess.Popen([sys.executable, "my_game.py", selected_difficulty]) # запускаем main.py и передаем туда сложность
+# Инициализация Pygame
 pygame.init()
 window = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("меню")
+pygame.display.set_caption("Меню")
 
-my_theme = pygame_menu.themes.THEME_SOLARIZED.copy() #устанавливаем тему
-my_theme.widget_margin = (0, 40)#расстояние между строк
-menu = pygame_menu.Menu("добро пожаловать",500, 400, theme=my_theme)
+# Тема меню
+my_theme = pygame_menu.themes.THEME_SOLARIZED.copy()
+my_theme.widget_margin = (0, 40)
+
+# Создаём меню
+menu = pygame_menu.Menu("Добро пожаловать", 500, 400, theme=my_theme)
+
+# Поле ввода имени
 menu.add.text_input("Введите имя: ", default='Егор')
-menu.add.selector('Выбрать сложность: ', [('easy', "0"), ('medium', "1"), ('hard', "2")], onchange=set_difficulty)
-menu.add.button('запустить', start_the_game)
+
+# Селектор сложности – значения передаются как строки
+menu.add.selector(
+    'Выбрать сложность: ',
+    [('easy', "0"), ('medium', "1"), ('hard', "2")],
+    onchange=set_difficulty,
+    default=0  # устанавливаем первый пункт как выбранный по умолчанию
+)
+
+# Кнопка запуска игры
+menu.add.button('Запустить', start_the_game)
 menu.add.button('Выйти', pygame_menu.events.EXIT)
+
+# Явно установим начальное значение сложности (чтобы переменная была определена)
+selected_difficulty = "0"   # соответствует 'easy'
+set_difficulty(None, "0")   # инициализируем глобальную переменную
+
+# Запуск цикла меню
 menu.mainloop(window)
